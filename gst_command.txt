@@ -1,0 +1,26 @@
+1.
+Receiver:
+gst-launch-1.0 -vvv  udpsrc port=1234 ! 'application/x-rtp, encoding-name=H264, clock-rate=90000 , payload=512,prop-parameter-sets=(string)"Z0JAKJWgHgCJ+VA\=\,aM48gA\=\="' ! rtph264depay ! h264parse ! queue  ! avdec_h264 output-corrupt=false ! queue ! videoconvert ! video/x-raw, format=I420 ! xvimagesink sync=false
+
+Transmitter;
+gst-launch-1.0 v4l2src  ! 'video/x-raw, format=(string)YUY2, width=(int)1920, height=(int)1080' ! nvvidconv ! omxh264enc ! 'video/x-h264, stream-format=(string)byte-stream' ! h264parse ! rtph264pay config-interval=1 ! queue ! udpsink buffer-size=100000  host=192.168.5.30 port=1234  sync=false 
+
+
+
+2.
+Receiver:
+gst-launch-1.0 udpsrc port=5000 ! application/x-rtp, clock-rate=90000,payload=96 !rtph263pdepay queue-delay=0 ! ffdec_h263
+! xvimagesink
+
+Transmitter:
+gst-launch-1.0 v4l2src device="/dev/video0" ! "video/x-raw, width=1920, height=1080, format=(string)YUY2" ! xvimagesink -e
+
+
+test:
+sprop-parameter-sets=(string)"Z0JAKJWgHgCJ+VA\=\,aM48gA\=\="
+
+
+
+Receiver:
+gst-launch-1.0 -vvv  udpsrc port=1234 ! 'application/x-rtp, encoding-name=H264, payload=96,prop-parameter-sets=(string)"Z0JAKJWgHgCJ+VA\=\,aM48gA\=\="' ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! video/x-raw, format=YUY2 ! xvimagesink 
+
